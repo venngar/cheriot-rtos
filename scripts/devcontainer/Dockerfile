@@ -2,6 +2,7 @@ FROM ubuntu:22.04
 ARG USERNAME=cheriot
 ARG LLVM_PATH=.
 ARG SAIL_PATH=.
+ARG CHERIOT_TOOLS_PATH=.
 
 RUN apt update \
     && apt upgrade -y \
@@ -24,6 +25,7 @@ RUN mkdir -p /cheriot-tools/bin
 # FIXME: We should be installing objdump as well
 COPY "${LLVM_PATH}/bin/clang" "${LLVM_PATH}/bin/lld" "${LLVM_PATH}/bin/llvm-objdump" "${LLVM_PATH}/bin/clangd" "${LLVM_PATH}/bin/clang-format" "${LLVM_PATH}/bin/clang-tidy" /cheriot-tools/bin/
 COPY "${SAIL_PATH}/cheriot_sim" /cheriot-tools/bin/
+ENV CHERIOT_TOOLS_PATH /cheriot-tools/bin/
 RUN cd /cheriot-tools/bin && ln -s clang clang++ && ln -s lld ld.lld && chmod +x *
 USER $USERNAME
 ENV SHELL /bin/bash

@@ -1,40 +1,41 @@
 # Constant: location of the custom tool binaries in the dev container
-DEV_CONTAINER_BIN="/cheriot-tools/bin/"
+# DEV_CONTAINER_BIN="/cheriot-tools/bin/"
 
 # Finds location of a given LLVM tool on the system.
 #
 # Argument 1: name of the LLVM tool to find (e.g.,
 #             `llvm-objdump`, `llvm-objcopy`)
-find_llvm_tool() {
+find_tool() {
 	TOOL_NAME=$1
-	LLVM_TOOL=${TOOL_NAME}
-	if ! type ${LLVM_TOOL} >/dev/null 2>&1 ; then
-		FROM_DEV_CONTAINER="${DEV_CONTAINER_BIN}/${TOOL_NAME}"
+	if ! type ${TOOL_NAME} >/dev/null 2>&1 ; then
+		FROM_DEV_CONTAINER="${CHERIOT_TOOLS_PATH}/${TOOL_NAME}"
 		if [ -x "${FROM_DEV_CONTAINER}" ] ; then
-			LLVM_TOOL=${FROM_DEV_CONTAINER}
+			TOOL_NAME=${FROM_DEV_CONTAINER}
 		else
-			if [ -n "${TOOLS_PATH}" ] ; then
-				WITH_TOOLS_PATH_SET="${TOOLS_PATH}/${TOOL_NAME}"
+			if [ -n "${CHERIOT_TOOLS_PATH}" ] ; then
+				WITH_TOOLS_PATH_SET="${CHERIOT_TOOLS_PATH}/${TOOL_NAME}"
 				if [ -x "${WITH_TOOLS_PATH_SET}" ] ; then
-					LLVM_TOOL=${WITH_TOOLS_PATH_SET}
+					TOOL_NAME=${WITH_TOOLS_PATH_SET}
+				else 
+					TOOL_NAME=${CHERIOT_TOOLS_PATH}
 				fi
 			fi
 		fi
 	fi
-	echo "${LLVM_TOOL}"
+	echo "${TOOL_NAME}"
 }
 
 # Wrapper for `find_llvm_tool` that does `exit 1` with an error message if the
 # tool cannot be found.
 #
 # Arguments are the same as `find_llvm_tool`.
-find_llvm_tool_required() {
-	LLVM_TOOL=$(find_llvm_tool $1)
 
-	if ! command -v ${LLVM_TOOL} >/dev/null 2>&1 ; then
-		echo Unable to locate $1, please set TOOLS_PATH to the directory containing the LLVM toolchain. >&2
-		exit 1
+find_tool_required() {
+	TOOL_PATH=$(find_tool $1)
+
+	if ! command -v ${TOOL_PATH} >/dev/null 2>&1 ; then
+		echo WARNING: Unable to locate $1, environment variable is set to CHERIOT_TOOLS_PATH. >&2
 	fi
 
-	echo "${LLVM_TOOL}"
+	echo "${TOOL_PATH}"
 }

@@ -3,7 +3,7 @@
 SCRIPT_DIRECTORY="$(dirname "$(realpath "$0")")"
 . ${SCRIPT_DIRECTORY}/includes/helper_find_llvm_install.sh
 
-OBJDUMP=$(find_llvm_tool_required llvm-objdump)
+CHERIOT_OBJDUMP_PATH=$(find_tool_required llvm-objdump)
 
 MACHINE_READABLE=0
 
@@ -16,7 +16,7 @@ print_compartment_size() {
 	# compartment name may return either 0kB, or an arbitrary number if the
 	# provided name matches legitimate compartments. This would be nice to
 	# fix at some point.
-	SIZE=$(${OBJDUMP} --headers $1 | grep -i $2 |
+	SIZE=$(${CHERIOT_OBJDUMP_PATH} --headers $1 | grep -i $2 |
 		awk '{ sum += "0x"$3 } END { print sum}')
 
 	if [ "$MACHINE_READABLE" -eq 0 ]; then
@@ -30,7 +30,7 @@ print_compartment_size() {
 print_full_code_size() {
 	# Print all sections between the start of the firmware (`loader_start`)
 	# and the end of `__cap_relocs`, and sum the sizes of sections
-	SIZE=$(${OBJDUMP} --headers $1 |
+	SIZE=$(${CHERIOT_OBJDUMP_PATH} --headers $1 |
 		awk '/loader_start/{f=1} /__cap_relocs/{f=0;print} f' |
 		awk '{ sum += "0x"$3 } END { print sum}')
 

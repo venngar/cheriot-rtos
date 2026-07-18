@@ -7,7 +7,7 @@ FIRMWARE_ELF=$1
 SCRIPT_DIRECTORY="$(dirname "$(realpath "$0")")"
 . ${SCRIPT_DIRECTORY}/includes/helper_find_llvm_install.sh
 
-OBJCOPY=$(find_llvm_tool_required llvm-objcopy)
+CHERIOT_OBJCOPY_PATH=$(find_tool_required llvm-objcopy)
 
 if ! command -v uf2conv > /dev/null ; then
 	echo "uf2conv not found.  On macOS / Linux systems with Python3 installed, you can install it with:"
@@ -16,7 +16,7 @@ if ! command -v uf2conv > /dev/null ; then
 fi
 
 # Convert the ELF file to a binary file
-${OBJCOPY} -O binary ${FIRMWARE_ELF} ${FIRMWARE_ELF}.bin
+${CHERIOT_OBJCOPY_PATH} -O binary ${FIRMWARE_ELF} ${FIRMWARE_ELF}.bin
 # Convert the binary to a UF2 (Microsoft USB Flashing Format) file
 uf2conv ${FIRMWARE_ELF}.bin -b0x00101000 -co ${FIRMWARE_ELF}.uf2
 

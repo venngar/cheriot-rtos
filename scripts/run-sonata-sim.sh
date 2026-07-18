@@ -2,8 +2,12 @@
 
 set -e
 
+SCRIPT_DIRECTORY="$(dirname "$(realpath "$0")")"
+. ${SCRIPT_DIRECTORY}/includes/helper_find_llvm_install.sh
+
 # Specify the default environment variables if they haven't been already.
-: "${SONATA_SIMULATOR:=/cheriot-tools/bin/sonata_simulator}"
+# : "${SONATA_SIMULATOR:=/cheriot-tools/bin/sonata_simulator}"
+CHERIOT_SONATA_SIMULATOR_PATH=$(find_tool_required sonata_simulator)
 : "${SONATA_SIMULATOR_BOOT_STUB:=/cheriot-tools/elf/sonata_simulator_hyperram_boot_stub}"
 : "${SONATA_SIMULATOR_UART_LOG=uart0.log}"
 
@@ -12,8 +16,8 @@ if [ -z "$1" ] ; then
 	exit 1
 fi
 
-if [ ! -x "${SONATA_SIMULATOR}" ] ; then
-	echo Unable to locate Sonata simulator, please set SONATA_SIMULATOR to the full path of the simulator.
+if [ ! -x "${CHERIOT_SONATA_SIMULATOR_PATH}" ] ; then
+	echo Unable to locate Sonata simulator, please set CHERIOT_SONATA_SIMULATOR_PATH to the full path of the simulator.
 	exit 2
 fi
 
@@ -25,7 +29,7 @@ fi
 # Remove old uart log
 rm -f "${SONATA_SIMULATOR_UART_LOG}"
 
-if ! ${SONATA_SIMULATOR} -E "${SONATA_SIMULATOR_BOOT_STUB}" -E "$1"; then
+if ! ${CHERIOT_SONATA_SIMULATOR_PATH} -E "${SONATA_SIMULATOR_BOOT_STUB}" -E "$1"; then
 	echo "Simulator exited with failure! UART output:"
 	cat "${SONATA_SIMULATOR_UART_LOG}"
 	exit 4
