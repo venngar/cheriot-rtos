@@ -4,12 +4,16 @@ set -e
 
 CORE_NAME=$1
 
-if [ -z ${CHERIOT_MSFT_SAFE_SIM} ] ; then
-	CHERIOT_MSFT_SAFE_SIM=/cheriot-tools/bin/cheriot_${CORE_NAME}_safe_sim
+SCRIPT_DIRECTORY="$(dirname "$(realpath "$0")")"
+. ${SCRIPT_DIRECTORY}/includes/helper_find_llvm_install.sh
+
+if [ -z ${CHERIOT_MSFT_SAFE_SIM_PATH} ] ; then
+	# CHERIOT_MSFT_SAFE_SIM_PATH=/cheriot-tools/bin/cheriot_${CORE_NAME}_safe_sim
+	CHERIOT_MSFT_SAFE_SIM_PATH=$(find_tool_required cheriot_${CORE_NAME}_safe_sim)
 fi
 
-if [ ! -x ${CHERIOT_MSFT_SAFE_SIM} ] ; then
-	echo Unable to locate simulator, please set CHERIOT_MSFT_SAFE_SIM to the full path to the simulator.
+if [ ! -x ${CHERIOT_MSFT_SAFE_SIM_PATH} ] ; then
+	echo Unable to locate simulator, please set CHERIOT_MSFT_SAFE_SIM_PATH to the full path to the simulator.
 	exit 1
 fi
 
@@ -38,4 +42,4 @@ fi
 $(dirname $0)/msft-safe-build-firmware.sh $2
 
 # Run the simulator.
-${CHERIOT_MSFT_SAFE_SIM}
+${CHERIOT_MSFT_SAFE_SIM_PATH}

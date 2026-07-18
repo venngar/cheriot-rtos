@@ -139,7 +139,7 @@ It is very strongly recommended that you do a release build, debug builds can ta
 The `LLVM_DISTRIBUTION_COMPONENTS` flag will let us build only the components that we want.
 You can change the `install` location to somewhere else, for example `~/cheriot-tools` if you want a more memorable path.
 
-Finally, build the toolchain:
+Build the toolchain:
 
 ```sh
 $ export NINJA_STATUS='%p [%f:%s/%t] %o/s, %es'
@@ -154,6 +154,17 @@ This will include:
  - `ld.lld`, the linker.
  - `llvm-objdump`, the tool for creating human-readable dumps of object code.
  - `clangd`, the language-server protocol implementation that is aware of our C/C++ extensions.
+
+Finally, permanently declare and save CHERIOT_TOOLS_PATH environment variable that will point towards the `bin` folder inside the LLVM by adding it to `.bashrc` file or similar one in other OS. 
+This should be an absolute path.
+Optionally, you can also declare CHERIOT_SDK environment variable that will be eventually used as an argument for `xmake`.
+
+For example, using paths from previous steps:
+```
+export CHERIOT_SDK="/home/ilias/cheriot/cheriot-llvm/builds/cheriot-llvm"
+
+export CHERIOT_TOOLS_PATH="/home/ilias/cheriot/cheriot-llvm/builds/cheriot-llvm/bin"
+```
 
 #### Configuring your editor
 

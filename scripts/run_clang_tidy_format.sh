@@ -1,23 +1,28 @@
 #!/usr/bin/env bash
+
+SCRIPT_DIRECTORY="$(dirname "$(realpath "$0")")"
+. ${SCRIPT_DIRECTORY}/includes/helper_find_llvm_install.sh
+
 set -eo pipefail
 if [ ! -d sdk ] ; then
 	echo Please run this script from the root of the cheriot-rtos repository.
 	exit 1
 fi
-CLANG_TIDY=/cheriot-tools/bin/clang-tidy
-CLANG_FORMAT=/cheriot-tools/bin/clang-format
+CHERIOT_CLANG_TIDY_PATH=$(find_tool_required clang-tidy)
+CHERIOT_CLANG_FORMAT_PATH=$(find_tool_required clang-format)
+
 if [ -n "$1" ] ; then
-	CLANG_TIDY=$1/clang-tidy
-	CLANG_FORMAT=$1/clang-format
+	CHERIOT_CLANG_TIDY_PATH=$1/clang-tidy
+	CHERIOT_CLANG_FORMAT_PATH=$1/clang-format
 fi
-if [ ! -x ${CLANG_TIDY} ] ; then
+if [ ! -x ${CHERIOT_CLANG_TIDY_PATH} ] ; then
 	echo Usage: $0 path/to/cheriot/tools/bin
-	echo clang-tidy not found at ${CLANG_TIDY}
+	echo clang-tidy not found at ${CHERIOT_CLANG_TIDY_PATH}
 	exit 1
 fi
-if [ ! -x ${CLANG_FORMAT} ] ; then
+if [ ! -x ${CHERIOT_CLANG_FORMAT_PATH} ] ; then
 	echo Usage: $0 path/to/cheriot/tools/bin
-	echo clang-format not found at ${CLANG_FORMAT}
+	echo clang-format not found at ${CHERIOT_CLANG_FORMAT_PATH}
 	exit 1
 fi
 
@@ -37,7 +42,7 @@ SOURCES=$(find ${DIRECTORIES} -name '*.cc' | grep -v -f scripts/run_clang_tidy_f
 echo Headers: ${HEADERS}
 echo Sources: ${SOURCES}
 
-${CLANG_FORMAT} -i ${HEADERS} ${SOURCES}
+${CHERIOT_CLANG_FORMAT_PATH} -i ${HEADERS} ${SOURCES}
 if ! git diff --exit-code ${HEADERS} ${SOURCES} ; then
 	echo clang-format applied changes
 	exit 1
@@ -45,7 +50,7 @@ fi
 
 rm -f tidy.fail-*
 # sh syntax is -c "string" [name [args ...]], so "tidy" here is the name and not included in "$@"
-echo ${HEADERS} ${SOURCES} | xargs -P${PARALLEL_JOBS} -n1 sh -c "${CLANG_TIDY} --extra-arg=-DCLANG_TIDY -export-fixes=\$(mktemp -p. tidy.fail-XXXX) \$@" tidy
+echo ${HEADERS} ${SOURCES} | xargs -P${PARALLEL_JOBS} -n1 sh -c "${CHERIOT_CLANG_TIDY_PATH} --extra-arg=-DCLANG_TIDY -export-fixes=\$(mktemp -p. tidy.fail-XXXX) \$@" tidy
 if [ $(find . -maxdepth 1 -name 'tidy.fail-*' -size +0 | wc -l) -gt 0 ] ; then
 	# clang-tidy put non-empty output in one of the tidy-*.fail files
 	cat tidy.fail-*
